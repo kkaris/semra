@@ -625,6 +625,23 @@ def write_neo4j(
     if not directory.is_dir():
         raise NotADirectoryError
 
+    # Clean mapping curies
+    new_mappings = []
+    for mapping in tqdm(mappings, unit="mapping", unit_scale=True, desc="Cleaning curies"):
+        mapping_s = Reference.from_curie(mapping.s.curie.split("\n")[0])
+        mapping_o = Reference.from_curie(mapping.o.curie.split("\n")[0])
+        mapping_p = Reference.from_curie(mapping.p.curie.split("\n")[0])
+        mapping_evidence = mapping.evidence
+        new_mapping = Mapping(
+            s=mapping_s,
+            p=mapping_p,
+            o=mapping_o,
+            evidence=mapping_evidence,
+        )
+        new_mappings.append(new_mapping)
+    # Update the mappings to the cleaned ones
+    mappings = new_mappings
+
     startup_path = directory.joinpath(startup_script_name)
     run_path = directory.joinpath(run_script_name)
     docker_path = directory.joinpath("Dockerfile")
